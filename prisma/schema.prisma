@@ -1,0 +1,171 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  GUEST
+  CUSTOMER_EMAIL
+  CUSTOMER_PHONE
+  OWNER_GUEST
+  OWNER_VERIFIED
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String?        @unique
+  emailVerified DateTime?      // Added for NextAuth.js
+  name          String?
+  image         String?
+  passwordHash  String?
+  phoneNumber   String?        @unique
+  isGoogleUser  Boolean        @default(false)
+  role          UserRole       @default(GUEST)
+  accounts      Account[]      // Added relation
+  sessions      Session[]      // Added relation
+  organizations Organization[]
+  createdAgents Agent[]        @relation("CreatedByUser")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Account {
+  id                 String    @id @default(cuid())
+  userId             String
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@unique([identifier, token])
+}
+
+model Organization {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  isVerified Boolean  @default(false)
+  ownerId    String
+  owner      User     @relation(fields: [ownerId], references: [id])
+  leads      Lead[]
+  agents     Agent[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Lead {
+  id             String        @id @default(cuid())
+  phoneNumber    String
+  email          String?
+  data           Json
+  public         Boolean       @default(false)
+  summary        Summary?      @relation("LeadSummary")
+  summaryId      String?       @unique
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  publicSearch   PublicSearch? @relation("PublicSearchLead")
+  calls          Call[]
+  keywords       Keyword[]     @relation("LeadKeywords")
+  clusterId      String?
+  cluster        Cluster?      @relation(fields: [clusterId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Agent {
+  id             String        @id @default(cuid())
+  name           String
+  type           String
+  voice          String?
+  prompt         String?
+  createdById    String?
+  createdBy      User?         @relation("CreatedByUser", fields: [createdById], references: [id])
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  calls          Call[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Call {
+  id           String   @id @default(cuid())
+  agentId      String
+  agent        Agent    @relation(fields: [agentId], references: [id])
+  leadId       String
+  lead         Lead     @relation(fields: [leadId], references: [id])
+  timestamp    DateTime @default(now())
+  recordingUrl String?
+  result       Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Summary {
+  id        String   @id @default(cuid())
+  leadId    String   @unique
+  lead      Lead     @relation("LeadSummary", fields: [leadId], references: [id])
+  text      String
+  jsonData  Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Keyword {
+  id        String    @id @default(cuid())
+  value     String
+  leads     Lead[]    @relation("LeadKeywords")
+  clusters  Cluster[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Cluster {
+  id        String    @id @default(cuid())
+  name      String
+  keywords  Keyword[]
+  leads     Lead[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model PublicSearch {
+  id        String   @id @default(cuid())
+  leadId    String   @unique
+  lead      Lead     @relation("PublicSearchLead", fields: [leadId], references: [id])
+  keywords  String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

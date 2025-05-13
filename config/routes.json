@@ -1,0 +1,22 @@
+[
+  {
+    "path": "/dashboard/:path*",
+    "roles": ["admin", "manager"]
+  },
+  {
+    "path": "/admin/:path*",
+    "roles": ["admin"]
+  },
+  {
+    "path": "/profile/:path*",
+    "roles": ["user", "admin"]
+  },
+  {
+    "path": "/settings/:path*",
+    "roles": ["admin", "manager"]
+  },
+  {
+    "path": "/orders/:path*",
+    "roles": ["admin", "sales"]
+  }
+]
