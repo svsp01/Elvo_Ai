@@ -1,35 +1,86 @@
-import { auth } from "@/auth"
 import { NextRequest, NextResponse } from "next/server";
-import routesConfig from "@/config/routes.json";
 
-export default async function middleware(request: NextRequest) {
-  const session = await auth()
+export function middleware(request: NextRequest) {
+  
+  console.log("Middleware: Running for", request.nextUrl.pathname);
+  const token =
+    request.cookies.get("next-auth.session-token")?.value ||
+    request.cookies.get("__Secure-next-auth.session-token")?.value ||
+    request.cookies.get("authjs.session-token")?.value;
+  console.log("Middleware: Effective token used:", token ? "Token Found" : "No Token");
 
-  const route = routesConfig.find(route =>
-    new RegExp(route.path.replace(":path*", ".*")).test(request.nextUrl.pathname)
+  console.log("Middleware: Checking for session tokens");
+  console.log(
+    "  next-auth.session-token:",
+    request.cookies.get("next-auth.session-token")?.value
+      ? "Found"
+      : "Not found"
   );
+  console.log(
+    "  __Secure-next-auth.session-token:",
+    request.cookies.get("__Secure-next-auth.session-token")?.value
+      ? "Found"
+      : "Not found"
+  );
+  console.log(
+    "  authjs.session-token:",
+    request.cookies.get("authjs.session-token")?.value ? "Found" : "Not found"
+  );
+  console.log(
+    "Middleware: Effective token used:",
+    token ? "Token Found" : "No Token"
+  );
+  console.log("Middleware: Request path:", request.nextUrl.pathname);
 
-  if (route && !session?.user) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  const { pathname } = request.nextUrl;
+  const url = request.nextUrl.clone();
+
+  // Redirect logged-in users away from the login page
+  if (pathname === "/login" && token) {
+    console.log(
+      "Middleware: User already logged in. Redirecting to dashboard."
+    );
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
   }
 
-  if (route && session?.user) {
-    const userRole = session.user.role || 'GUEST';
-    if (!route.roles.includes(userRole.toLowerCase())) {
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
-    }
+  const protectedRoutes = [
+    "/dashboard",
+    "/admin",
+    "/profile",
+    "/settings",
+    "/orders",
+  ];
+
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  if (isProtectedRoute && !token) {
+    console.log(
+      `Middleware: Protected route '${pathname}' and no token. Redirecting to login.`
+    );
+    url.pathname = "/login";
+    url.searchParams.set("callbackUrl", pathname + request.nextUrl.search);
+    return NextResponse.redirect(url);
+  }
+
+  if (!isProtectedRoute && token) {
+    console.log(`Middleware: User has role 'GUEST', redirecting to login.`);
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
 }
 
-// Static matcher patterns based on routes.json
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/admin/:path*',
-    '/profile/:path*',
-    '/settings/:path*',
-    '/orders/:path*'
-  ]
+    "/login",
+    "/dashboard/:path*",
+    "/admin/:path*",
+    "/profile/:path*",
+    "/settings/:path*",
+    "/orders/:path*",
+  ],
 };

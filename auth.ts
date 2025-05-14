@@ -1,6 +1,6 @@
 // app/lib/auth.ts
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, UserRole } from "@prisma/client";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
@@ -9,7 +9,12 @@ import { compare, hash } from "bcrypt";
 
 declare module "next-auth" {
   interface User {
-    role: "GUEST" | "CUSTOMER_EMAIL" | "CUSTOMER_PHONE" | "OWNER_GUEST" | "OWNER_VERIFIED";
+    role:
+      | "GUEST"
+      | "CUSTOMER_EMAIL"
+      | "CUSTOMER_PHONE"
+      | "OWNER_GUEST"
+      | "OWNER_VERIFIED";
   }
 }
 
@@ -17,6 +22,9 @@ const prisma = new PrismaClient();
 
 export const authOptions: NextAuthConfig = {
   adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: "jwt",
+  },
   debug: true,
   providers: [
     GoogleProvider({
@@ -84,12 +92,16 @@ export const authOptions: NextAuthConfig = {
         }
 
         if (user.isGoogleUser || !user.passwordHash) {
-          console.log("CredentialsProvider: User is Google-only or no password set");
+          console.log(
+            "CredentialsProvider: User is Google-only or no password set"
+          );
           throw new Error("Please use Google to sign in");
         }
 
         const isValid = await compare(password, user.passwordHash);
-        console.log("CredentialsProvider: Password comparison result", { isValid });
+        console.log("CredentialsProvider: Password comparison result", {
+          isValid,
+        });
         if (!isValid) {
           console.log("CredentialsProvider: Invalid credentials");
           throw new Error("Invalid credentials");
@@ -109,18 +121,23 @@ export const authOptions: NextAuthConfig = {
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      console.log("Session callback called", { sessionUser: session.user, user });
-      if (session.user) {
-        session.user.id = user.id;
-        session.user.role = user.role;
+    async session({ session, token }) {
+      console.log("Session callback called", { session, token });
+
+      if (session.user && token) {
+        session.user.id = token.sub!;
+        session.user.role = token.role as UserRole;
+        session.user.email = token.email!;
+        session.user.name = token.name || session.user.name; // Fallback to existing session name if null
       }
-      console.log("Session callback result", { session });
+
+      console.log("Updated session:", session);
       return session;
     },
     async jwt({ token, user }) {
       console.log("JWT callback called", { token, user });
       if (user?.role) {
+        // 'user' is typically only present during sign-in
         token.role = user.role;
       }
       console.log("JWT callback result", { token });
@@ -129,16 +146,19 @@ export const authOptions: NextAuthConfig = {
     async signIn({ user, account, profile }) {
       console.log("SignIn callback called", { user, account, profile });
       if (account?.provider === "google") {
-        console.log("SignIn: Google OAuth user", { userEmail: user.email, profile });
+        console.log("SignIn: Google OAuth user", {
+          userEmail: user.email,
+          profile,
+        });
       }
       return true;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
-    signIn: "/auth/signin",
-    error: "/auth/error",
+    signIn: "/login", // Align with your custom login page URL
+    error: "/auth/error", // Ensure this points to your actual error page e.g. /error
   },
 };
 
-export const { auth, handlers, signIn, signOut } = NextAuth(authOptions);
+export const { auth, handlers, signIn, signOut } = NextAuth(authOptions); // Ensure 'auth' is exported

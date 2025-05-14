@@ -1,19 +1,36 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Github, Lock, Mail } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react"; // Import useEffect
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AuthCard() {
+  const router = useRouter();
+  const searchParams = useSearchParams(); // Keep this for now, but we'll get the value in useEffect
+  const [callbackUrl, setCallbackUrl] = useState<string | null>(null);
+
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  useEffect(() => {
+    // Ensure this runs only on the client after hydration
+    setCallbackUrl(searchParams.get("callbackUrl"));
+  }, [searchParams]); // Re-run if searchParams object changes
 
   // Log state changes
   const setErrorWithLog = (value: string) => {
@@ -76,7 +93,7 @@ export default function AuthCard() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false,
+        redirect: false, // Keep this to handle errors inline
       }).catch((err) => {
         console.error("AuthCard: Network error during signIn", {
           error: err.message,
@@ -90,7 +107,9 @@ export default function AuthCard() {
 
       if (!result) {
         console.log("AuthCard: Credentials login failed: result is undefined");
-        setErrorWithLog("Login failed: Server did not respond. Please try again.");
+        setErrorWithLog(
+          "Login failed: Server did not respond. Please try again."
+        );
         setLoadingWithLog(false);
         return;
       }
@@ -101,7 +120,11 @@ export default function AuthCard() {
           status: result.status,
           ok: result.ok,
         });
-        setErrorWithLog("Login failed. Please check your email and password.");
+        setErrorWithLog(
+          result.error === "CredentialsSignin"
+            ? "Login failed. Please check your email and password."
+            : "Login failed. Please check your email and password."
+        );
         setLoadingWithLog(false);
         return;
       }
@@ -110,7 +133,8 @@ export default function AuthCard() {
         status: result.status,
         url: result.url,
       });
-      window.location.href = "/";
+      // window.location.href = "/"; // OLD: Hardcoded redirect
+      router.replace(callbackUrl || "/dashboard");
     } catch (err) {
       console.error("AuthCard: Unexpected error in credentials login", err);
       setErrorWithLog("An unexpected error occurred during login");
@@ -124,7 +148,10 @@ export default function AuthCard() {
     setLoadingWithLog(true);
     try {
       console.log(`AuthCard: Initiating ${provider} OAuth login`);
-      await signIn(provider, { callbackUrl: "/" }).catch((err) => {
+      // Use the callbackUrl from query params, or default to /dashboard
+      await signIn(provider, {
+        callbackUrl: callbackUrl || "/dashboard",
+      }).catch((err) => {
         console.error(`AuthCard: Network error during ${provider} signIn`, {
           error: err.message,
           name: err.name,
@@ -145,7 +172,9 @@ export default function AuthCard() {
     <Card className="w-[380px]">
       <CardHeader>
         <CardTitle>Account Access</CardTitle>
-        <CardDescription>Login or create a new account to continue</CardDescription>
+        <CardDescription>
+          Login or create a new account to continue
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
@@ -244,7 +273,9 @@ export default function AuthCard() {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            <span className="bg-background px-2 text-muted-foreground">
+              Or continue with
+            </span>
           </div>
         </div>
         <Button
