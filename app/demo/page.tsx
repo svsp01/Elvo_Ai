@@ -102,7 +102,7 @@ export default function DemoPage() {
                 {/* Feature 1 */}
                 <div className="flex items-start">
                   <div className="flex-shrink-0 mt-1">
-                    <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-[#10B981] flex items-center justify-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-4 w-4 text-white"
@@ -128,7 +128,7 @@ export default function DemoPage() {
                 {/* Feature 2 */}
                 <div className="flex items-start">
                   <div className="flex-shrink-0 mt-1">
-                    <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-[#10B981] flex items-center justify-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-4 w-4 text-white"
@@ -154,7 +154,7 @@ export default function DemoPage() {
                 {/* Feature 3 */}
                 <div className="flex items-start">
                   <div className="flex-shrink-0 mt-1">
-                    <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-[#10B981] flex items-center justify-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-4 w-4 text-white"
@@ -188,7 +188,7 @@ export default function DemoPage() {
                   height={350}
                   className="w-full h-auto"
                 />
-                <div className="absolute bottom-4 left-0 right-0 text-center text-blue-500 font-medium">
+                <div className="absolute bottom-4 left-0 right-0 text-center text-[#10B981] font-medium">
                   you can click record in your web browser
                 </div>
               </div>
@@ -201,7 +201,7 @@ export default function DemoPage() {
                   <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-10 w-10 text-blue-500"
+                      className="h-10 w-10 text-[#10B981]"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -233,7 +233,7 @@ export default function DemoPage() {
                     transcribe their important conversations.
                   </p>
 
-                  <div className="flex flex-wrap justify-center items-center gap-8 opacity-70">
+                  {/* <div className="flex flex-wrap justify-center items-center gap-8 opacity-70">
                     <Image
                       src="/placeholder.svg?height=30&width=100"
                       alt="Amazon"
@@ -258,7 +258,7 @@ export default function DemoPage() {
                       width={100}
                       height={30}
                     />
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

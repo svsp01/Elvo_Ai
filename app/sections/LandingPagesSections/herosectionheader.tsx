@@ -13,7 +13,7 @@ function HerosectionHeader() {
       </p>
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
         <Link
-          href="#"
+          href="/home"
           className="bg-[#10B981] hover:bg-emerald-800 text-white font-medium px-6 py-3 rounded-full w-full sm:w-auto"
         >
           Start for Free

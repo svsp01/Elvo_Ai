@@ -80,7 +80,7 @@ export default function DemoForm() {
           id="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#10B981]"
           placeholder="your.name@company.com"
         />
         {emailError && (
@@ -98,7 +98,7 @@ export default function DemoForm() {
         <div className="relative">
           <button
             type="button"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-[#10B981]"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             <span className={department ? "text-gray-900" : "text-gray-500"}>
@@ -132,7 +132,7 @@ export default function DemoForm() {
 
       <button
         type="submit"
-        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-md transition-colors"
+        className="w-full bg-[#10B981] hover:bg-emerald-800 text-white font-medium py-2.5 px-4 rounded-md transition-colors"
       >
         Submit
       </button>

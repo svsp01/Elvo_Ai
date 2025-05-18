@@ -505,7 +505,7 @@ export default function AuthCard() {
                   value={email}
                   disabled={loading}
                   onChange={(e) => setEmailWithLog(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   required
                 />
               </div>
@@ -518,7 +518,7 @@ export default function AuthCard() {
                   value={password}
                   disabled={loading}
                   onChange={(e) => setPasswordWithLog(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring- focus:ring-emerald-800 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring- focus:ring-[#10B981] focus:border-transparent"
                   required
                 />
               </div>
@@ -526,7 +526,7 @@ export default function AuthCard() {
               <div className="mb-6 text-right">
                 <Link
                   href="/forgot-password"
-                  className="text-emerald-800 hover:bg-[#10B981] text-sm"
+                  className="text-[#10B981] hover:bg-emerald-800 text-sm"
                 >
                   Forgot your password?
                 </Link>
@@ -537,8 +537,8 @@ export default function AuthCard() {
                 disabled={isSubmitting || !email}
                 className={`w-full py-3 rounded-md transition-colors mb-6 ${
                   email
-                    ? "bg-emerald-800 text-white hover:bg-[#10B981]"
-                    : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                    ? "bg-[#10B981] text-white hover:bg-emerald-800"
+                    : "bg-[#10B981] text-white hover:bg-emerald-800"
                 }`}
               >
                 {isSubmitting ? "Signing in..." : "Sign in"}
@@ -549,14 +549,14 @@ export default function AuthCard() {
               By using Elvo you agree to the{" "}
               <Link
                 href="/terms"
-                className="text-emerald-800 hover:bg-[#10B981]"
+                className="text-[#10B981] hover:bg-emerald-800"
               >
                 Terms of Service
               </Link>{" "}
               and{" "}
               <Link
                 href="/privacy"
-                className="text-emerald-800 hover:bg-[#10B981]"
+                className="text-[#10B981] hover:bg-emerald-800"
               >
                 Privacy Policy
               </Link>

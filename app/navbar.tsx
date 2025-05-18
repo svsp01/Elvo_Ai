@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -102,7 +102,7 @@ export default function Navbar() {
               Pricing
             </Link>
             <Link
-              href="#"
+              href="/home"
               className="bg-[#10B981] hover:bg-emerald-800 text-white font-medium px-4 py-2 rounded-full"
             >
               Start for Free
