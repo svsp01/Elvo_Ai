@@ -22,12 +22,12 @@ export function Sidebar() {
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-    { icon: PlusCircle, label: "Create Lead", href: "/leads/create" },
-    { icon: Brain, label: "AI Agents", href: "/ai-agents" },
+    { icon: PlusCircle, label: "Create Lead", href: "/leads" },
+    { icon: Brain, label: "AI Callers", href: "/callers" },
     {
       icon: Building,
       label: "Create Organisation",
-      href: "/create-organisation",
+      href: "/organizations",
     },
     { icon: Network, label: "Clusters", href: "/clusters" },
     { icon: Settings, label: "Settings", href: "/settings" },

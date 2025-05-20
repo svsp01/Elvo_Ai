@@ -26,7 +26,7 @@ export default async function DashboardPage() {
   // Fetch user's organizations
   const organizations = await prisma.organization.findMany({
     where: { ownerId: session.user.id },
-    select: { id: true, name: true, slug: true, isVerified: true },
+    select: { id: true, name: true, description: true, isVerified: true },
   });
 
   return (
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
                 <ul className="list-disc pl-5">
                   {organizations.map((org) => (
                     <li key={org.id}>
-                      {org.name} ({org.slug})
+                      {org.name} ({org.description})
                       {org.isVerified ? " ✅ Verified" : " ⏳ Unverified"}
                     </li>
                   ))}

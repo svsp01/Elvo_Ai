@@ -76,7 +76,7 @@ model VerificationToken {
 model Organization {
   id         String   @id @default(cuid())
   name       String
-  slug       String   @unique
+  description String?  // Changed: Fixed spelling and made nullable
   isVerified Boolean  @default(false)
   ownerId    String
   owner      User     @relation(fields: [ownerId], references: [id])
