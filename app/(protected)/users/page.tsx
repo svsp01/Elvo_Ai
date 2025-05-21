@@ -1,22 +1,39 @@
-import { fetchUsers } from "@/services/api";
-import { User } from "@prisma/client";
+import { Suspense } from 'react';
+import { fetchUsers } from '@/services/api';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/card';
+import UserTable from './components/client/UserTable';
+import Loading from './loading';
 
 export default async function UsersPage() {
-  const users = await fetchUsers();
+  let users = [];
+  let error = null;
+
+  try {
+    users = await fetchUsers();
+  } catch (e) {
+    error = e instanceof Error ? e.message : 'Failed to fetch users';
+    console.error('Error fetching users:', e);
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl text-destructive">Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-destructive">{error}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -25,26 +42,9 @@ export default async function UsersPage() {
           <CardTitle className="text-2xl">User List</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead className="text-right">Role</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user: User) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.id}</TableCell>
-                  <TableCell>{user.name || "—"}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell className="text-right">{user.role || "user"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <Suspense fallback={<Loading />}>
+            <UserTable users={users} />
+          </Suspense>
         </CardContent>
       </Card>
     </div>
