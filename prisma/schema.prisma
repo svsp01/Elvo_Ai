@@ -76,7 +76,7 @@ model VerificationToken {
 model Organization {
   id         String   @id @default(cuid())
   name       String
-  slug       String   @unique
+  description String?  // Changed: Fixed spelling and made nullable
   isVerified Boolean  @default(false)
   ownerId    String
   owner      User     @relation(fields: [ownerId], references: [id])
@@ -91,11 +91,11 @@ model Lead {
   phoneNumber    String
   email          String?
   data           Json
-  public         Boolean       @default(false)
+  public         Boolean?       @default(false)
   summary        Summary?      @relation("LeadSummary")
   summaryId      String?       @unique
-  organizationId String
-  organization   Organization  @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  organization   Organization?  @relation(fields: [organizationId], references: [id])
   publicSearch   PublicSearch? @relation("PublicSearchLead")
   calls          Call[]
   keywords       Keyword[]     @relation("LeadKeywords")
