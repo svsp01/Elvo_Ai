@@ -82,5 +82,6 @@ export const config = {
     "/profile/:path*",
     "/settings/:path*",
     "/orders/:path*",
+    "/api/agents/:path*"
   ],
 };
