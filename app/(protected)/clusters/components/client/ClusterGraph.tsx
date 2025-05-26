@@ -14,8 +14,9 @@ import ReactFlow, {
   NodeChange
 } from 'reactflow'
 import 'reactflow/dist/style.css'
+import { ClusterNodeData, SerializedLeadWithRelations, ClusterWithRelations, LeadWithRelations } from '../../types'
 import { ClusterNode } from './ClusterNode'
-import { ClusterNodeData, LeadWithRelations, ClusterWithRelations } from '../../types'
+import { Lead } from '@prisma/client'
 
 type ClusterNodeType = Node<ClusterNodeData>
 

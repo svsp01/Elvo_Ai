@@ -1,9 +1,15 @@
-import { Lead, Cluster, Keyword, Summary } from '@prisma/client'
+import { Lead, Cluster, Keyword, Summary, Prisma } from '@prisma/client'
 
 export interface LeadWithRelations extends Lead {
   keywords: Keyword[]
   summary: Summary | null
   cluster: Cluster | null
+}
+
+// Add this new interface for serialized data
+export interface SerializedLeadWithRelations extends Omit<LeadWithRelations, 'createdAt' | 'updatedAt'> {
+  createdAt: Date | string
+  updatedAt: Date | string
 }
 
 export interface SearchResponse {
@@ -24,3 +30,19 @@ export interface ClusterNodeData {
   keywords: Keyword[]
   summary: Summary | null
 }
+export interface ClusterNodeData {
+  lead: LeadWithRelations
+  keywords: Keyword[]
+  summary: Summary | null
+}
+
+
+export type LeadsWithRelations = Prisma.LeadGetPayload<{
+  include: {
+    summary: true;
+    organization: true;
+    calls: true;
+    cluster: true;
+    keywords: true;
+  };
+}>;

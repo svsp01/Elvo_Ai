@@ -17,6 +17,22 @@ enum UserRole {
   OWNER_VERIFIED
 }
 
+enum CallStatus {
+  INITIATED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  NO_ANSWER
+  BUSY
+}
+
+enum AgentType {
+  SALES
+  SUPPORT
+  SURVEY
+  CUSTOM
+}
+
 model User {
   id            String         @id @default(cuid())
   email         String?        @unique
@@ -108,9 +124,10 @@ model Lead {
 model Agent {
   id             String        @id @default(cuid())
   name           String
-  type           String
-  voice          String?
+  type           AgentType     @default(SALES)
+  voice          String?       @default("en-IN")
   prompt         String?
+  isDefault      Boolean       @default(false)
   createdById    String?
   createdBy      User?         @relation("CreatedByUser", fields: [createdById], references: [id])
   organizationId String?
@@ -121,17 +138,23 @@ model Agent {
 }
 
 model Call {
-  id           String   @id @default(cuid())
+  id           String     @id @default(cuid())
   agentId      String
-  agent        Agent    @relation(fields: [agentId], references: [id])
+  agent        Agent      @relation(fields: [agentId], references: [id])
   leadId       String
-  lead         Lead     @relation(fields: [leadId], references: [id])
-  timestamp    DateTime @default(now())
+  lead         Lead       @relation(fields: [leadId], references: [id])
+  status       CallStatus @default(INITIATED)
+  twilioSid    String?    // Twilio call SID
+  sessionId    String?    // FastAPI session ID
   recordingUrl String?
-  result       Json
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  duration     Int?       // Call duration in seconds
+  result       Json       @default("{}")
+  summary      String?    // AI-generated call summary
+  timestamp    DateTime   @default(now())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
+
 
 model Summary {
   id        String   @id @default(cuid())

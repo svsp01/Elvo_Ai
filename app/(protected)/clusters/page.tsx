@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
-import { ClusterContainer } from './components/server/ClusterContainer'
 import LoadingAnimation from '@/components/loading/LoadingAnimation'
 import { SearchBarWrapper } from './components/client/SearchBarWrapper'
+import { ClusterContainerServer } from './components/server/ClusterContainerServer'
 
 export default async function ClustersPage() {
   return (
@@ -12,7 +12,7 @@ export default async function ClustersPage() {
         </Suspense>
       </div>
       <Suspense fallback={<LoadingAnimation />}>
-        <ClusterContainer />
+        <ClusterContainerServer />
       </Suspense>
     </div>
   )

@@ -1,24 +1,28 @@
-import { prisma } from '@/lib/prisma'
+'use client'
+
+import { useEffect } from 'react'
 import { ClusterGraph } from '../client/ClusterGraph'
+import { LeadWithRelations, ClusterWithRelations } from '../../types'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { resetToInitial } from '@/store/clusterSlice'
 
-export async function ClusterContainer() {
-  const leads = await prisma.lead.findMany({
-    include: {
-      keywords: true,
-      cluster: true,
-      summary: true
-    }
-  })
+interface ClusterContainerProps {
+  initialLeads: LeadWithRelations[]
+  initialClusters: ClusterWithRelations[]
+}
 
-  const clusters = await prisma.cluster.findMany({
-    include: {
-      keywords: true
-    }
-  })
+function ClusterContainer({ initialLeads, initialClusters }: ClusterContainerProps) {
+  const { leads, isSearchActive } = useAppSelector(state => state.cluster)
+
+  const displayLeads = isSearchActive ? leads : initialLeads
 
   return (
     <div className="w-full h-[80vh] bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border rounded-xl">
-      <ClusterGraph initialLeads={leads} initialClusters={clusters} />
+      <ClusterGraph initialLeads={displayLeads} initialClusters={initialClusters} />
     </div>
   )
 }
+
+export default ClusterContainer
+// Server component in a separate file
+// Create a new file: ClusterContainerServer.tsx
