@@ -4,17 +4,21 @@ import { revalidatePath } from 'next/cache';
 import { axiosFastApiInstance } from '@/services/api/axiosfastapiinstance';
 
 export async function POST(request: NextRequest) {
+  console.log('📨 Received POST request on /api/calls');
+
   try {
-    const { leadId, agentId } = await request.json();
+    const body = await request.json();
+    const { leadId, agentId } = body;
 
     if (!leadId) {
+      console.warn('⚠️ Missing leadId in request body:', body);
       return NextResponse.json(
         { success: false, error: 'Lead ID is required' },
         { status: 400 }
       );
     }
 
-    // Get lead details from database
+    console.log(`🔍 Fetching lead by ID: ${leadId}`);
     const lead = await prisma.lead.findUnique({
       where: { id: leadId },
       include: {
@@ -24,26 +28,23 @@ export async function POST(request: NextRequest) {
     });
 
     if (!lead) {
+      console.warn(`❌ Lead not found: ${leadId}`);
       return NextResponse.json(
         { success: false, error: 'Lead not found' },
         { status: 404 }
       );
     }
 
-    // Get agent details (use default if not provided)
     let agent;
     if (agentId) {
-      agent = await prisma.agent.findUnique({
-        where: { id: agentId },
-      });
+      console.log(`🔍 Fetching agent by ID: ${agentId}`);
+      agent = await prisma.agent.findUnique({ where: { id: agentId } });
     } else {
-      // Get default agent for the organization or create one
-      agent = await prisma.agent.findFirst({
-        where: { organizationId: lead.organizationId },
-      });
-      
+      console.log('🧠 Fetching default agent for organization:', lead.organizationId);
+      agent = await prisma.agent.findFirst({ where: { organizationId: lead.organizationId } });
+
       if (!agent) {
-        // Create a default agent
+        console.log('⚙️ No agent found, creating default sales agent...');
         agent = await prisma.agent.create({
           data: {
             name: 'Default Sales Agent',
@@ -57,23 +58,26 @@ export async function POST(request: NextRequest) {
     }
 
     if (!agent) {
+      console.error('❌ Agent not found or created');
       return NextResponse.json(
         { success: false, error: 'Agent not found' },
         { status: 404 }
       );
     }
 
-    // Create call record in database
+    console.log('📞 Creating initial call record...');
     const call = await prisma.call.create({
       data: {
         leadId: lead.id,
         agentId: agent.id,
         status: 'INITIATED',
-        result: { status: 'initiated', timestamp: new Date().toISOString() },
+        result: {
+          status: 'initiated',
+          timestamp: new Date().toISOString(),
+        },
       },
     });
 
-    // Prepare data for FastAPI
     const fastApiPayload = {
       phone: lead.phoneNumber,
       prompt: agent.prompt || 'You are a sales agent. Be professional and helpful.',
@@ -86,10 +90,33 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    // Call FastAPI backend
-    const fastApiResponse = await axiosFastApiInstance.post('/call', fastApiPayload);
+    console.log('🚀 Sending payload to FastAPI backend:', fastApiPayload);
 
-    // Update call record with FastAPI response
+    let fastApiResponse;
+    try {
+      fastApiResponse = await axiosFastApiInstance.post('/call', fastApiPayload);
+      console.log('✅ FastAPI response received:', fastApiResponse.data);
+    } catch (axiosError: any) {
+      console.error('❌ FastAPI call failed:', axiosError.response?.data || axiosError.message);
+
+      await prisma.call.update({
+        where: { id: call.id },
+        data: {
+          status: 'FAILED',
+          result: {
+            ...(call.result as Record<string, any>),
+            status: 'failed',
+            error: axiosError.response?.data || axiosError.message,
+          },
+        },
+      });
+
+      return NextResponse.json(
+        { success: false, error: 'Failed to initiate call via backend service' },
+        { status: 502 }
+      );
+    }
+
     await prisma.call.update({
       where: { id: call.id },
       data: {
@@ -113,16 +140,41 @@ export async function POST(request: NextRequest) {
       twilioSid: fastApiResponse.data.sid,
       sessionId: fastApiResponse.data.session_id,
     });
+  } catch (error: any) {
+    console.error('🚨 Unexpected error in /api/calls POST:', {
+      message: error.message,
+      stack: error.stack,
+    });
 
-  } catch (error) {
-    console.error('Call initiation error:', error);
-    
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to initiate call' 
+      {
+        success: false,
+        error: 'Unexpected server error occurred',
+        details: error.message,
       },
       { status: 500 }
     );
   }
+}
+
+// Optional — block unsupported methods clearly
+export async function GET() {
+  return NextResponse.json(
+    { success: false, error: 'GET method not allowed on /api/calls' },
+    { status: 405 }
+  );
+}
+
+export async function PUT() {
+  return NextResponse.json(
+    { success: false, error: 'PUT method not allowed on /api/calls' },
+    { status: 405 }
+  );
+}
+
+export async function DELETE() {
+  return NextResponse.json(
+    { success: false, error: 'DELETE method not allowed on /api/calls' },
+    { status: 405 }
+  );
 }

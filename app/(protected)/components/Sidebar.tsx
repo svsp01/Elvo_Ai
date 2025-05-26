@@ -22,6 +22,7 @@ export function Sidebar() {
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+    { icon: Network, label: "Leads Store", href: "/clusters" },
     { icon: PlusCircle, label: "Create Lead", href: "/leads" },
     { icon: Brain, label: "AI Callers", href: "/callers" },
     {
@@ -29,7 +30,6 @@ export function Sidebar() {
       label: "Create Organisation",
       href: "/organizations",
     },
-    { icon: Network, label: "Clusters", href: "/clusters" },
     { icon: Settings, label: "Settings", href: "/settings" },
   ];
 
